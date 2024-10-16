@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インタラクティブな散布図</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 5px;
+            background: lightsteelblue;
+            border: 1px solid black;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <svg width="600" height="400"></svg>
+    <script>
+        const data = [
+            { flower: 'バラ', x: 30, y: 20 },
+            { flower: 'ヒマワリ', x: 70, y: 80 },
+            { flower: 'チューリップ', x: 100, y: 50 },
+            { flower: 'ダリア', x: 150, y: 100 },
+            { flower: '桜', x: 200, y: 60 }
+        ];
+
+        const colors = {
+            'バラ': 'red',
+            'ヒマワリ': 'yellow',
+            'チューリップ': 'pink',
+            'ダリア': 'purple',
+            '桜': 'lightpink'
+        };
+
+        const shapes = {
+            'バラ': 'circle',
+            'ヒマワリ': 'triangle',
+            'チューリップ': 'square',
+            'ダリア': 'cross',
+            '桜': 'diamond'
+        };
+
+        const svg = d3.select("svg");
+        const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
+
+        const xScale = d3.scaleLinear().domain([0, 250]).range([0, 600]);
+        const yScale = d3.scaleLinear().domain([0, 120]).range([400, 0]);
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale(d.x))
+            .attr("cy", d => yScale(d.y))
+            .attr("r", 5)
+            .attr("fill", d => colors[d.flower])
+            .on("mouseover", function(event, d) {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(d.flower)
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function() {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
+
+        let drag = d3.drag()
+            .on("drag", (event) => {
+                const dx = event.dx;
+                const dy = event.dy;
+                svg.attr("transform", (d) => `translate(${dx}, ${dy})`);
+            });
+
+        svg.call(drag);
+    </script>
+</body>
+</html>
